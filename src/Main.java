@@ -5,5 +5,6 @@ public class Main {
         Dima.sayHello();
         System.out.println(Dima.name);
         Dima.calculateYearOfBirth();
+        System.out.println(Dima.toString());
     }
 }
