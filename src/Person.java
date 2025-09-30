@@ -1,4 +1,4 @@
-public class Person {
+public class Person implements Rules {
     public String name;
     public int age;
     public float height;
@@ -16,6 +16,10 @@ public class Person {
 
     public void sayHello() {
         System.out.println("Hello");
+    }
+
+    public void Speak(){
+        System.out.println("Ich bin Mensch");
     }
 
     @Override

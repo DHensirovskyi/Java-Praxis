@@ -37,5 +37,11 @@ public class Main {
         for(Animal animal : animals){
             animal.makeSound();
         }
+
+        Person person = new Person("Dima", 16, 190);
+        Robot bot = new Robot();
+
+        person.Speak();
+        bot.Speak();
     }
 }
