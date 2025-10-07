@@ -18,6 +18,8 @@ public class Main {
         scanner.close();
     }
 
+
+
     public static boolean checkAge(int age){
         return age >= 18;
     }
@@ -40,7 +42,7 @@ public class Main {
 
         // Task 3
         try{
-            if(checkAge(14)){
+            if(checkAge(20)){
                 System.out.println("Nice, age is ok");
             }else{
                 throw new TooYoungException();
