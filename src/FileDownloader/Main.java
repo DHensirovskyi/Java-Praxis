@@ -3,28 +3,26 @@ package FileDownloader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
-    static class ConnectionLostException extends Exception {
-        public ConnectionLostException() {
-        }
-    }
+    static class ConnectionLostException extends Exception {}
 
-    static class DownloadTimedOutException extends Exception {
-        public DownloadTimedOutException() {
-        }
-    }
+    static class DownloadTimedOutException extends Exception {}
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Random random = new Random();
         List<String> files = List.of("file1.zip", "file2.mp4", "file3.jpg", "file4.png", "file5.mov");
         List<Thread> threads = new ArrayList<>();
         AtomicInteger success = new AtomicInteger(0);
         AtomicInteger fail = new AtomicInteger(0);
+        ExecutorService executor = Executors.newFixedThreadPool(3);
 
         for (String file : files) {
-            Thread thread = new Thread(() -> {
+            executor.submit(() -> {
                 try {
                     Thread.sleep(1000 + random.nextInt(2000));
 
@@ -47,18 +45,10 @@ public class Main {
                     System.out.println("❌ " + e.getMessage());
                 }
             });
-
-            threads.add(thread);
-            thread.start();
         }
 
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.MINUTES);
 
         System.out.println("\n------------- Download Summary -------------");
         System.out.println("✅ Downloaded: " + success);
