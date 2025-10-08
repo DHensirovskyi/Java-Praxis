@@ -3,14 +3,11 @@ package FileDownloader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
     static class ConnectionLostException extends Exception {}
-
     static class DownloadTimedOutException extends Exception {}
 
     public static void main(String[] args) throws InterruptedException {
@@ -20,9 +17,11 @@ public class Main {
         AtomicInteger success = new AtomicInteger(0);
         AtomicInteger fail = new AtomicInteger(0);
         ExecutorService executor = Executors.newFixedThreadPool(3);
+        List<Future<String>> results = new ArrayList<>();
 
+        System.out.println("Downloading started...");
         for (String file : files) {
-            executor.submit(() -> {
+            Callable<String> task = (() -> {
                 try {
                     Thread.sleep(1000 + random.nextInt(2000));
 
@@ -34,21 +33,32 @@ public class Main {
                     }
 
                     success.incrementAndGet();
-                    System.out.println("✅ " + file + " downloaded successfully");
+                    return "✅ " + file + " downloaded successfully";
                 } catch (ConnectionLostException e) {
-                    System.out.println("❌ Connection lost for " + file);
                     fail.incrementAndGet();
+                    return "❌ Connection lost for " + file;
                 } catch (DownloadTimedOutException e) {
-                    System.out.println("❌ Download timed out for " + file);
                     fail.incrementAndGet();
+                    return "❌ Download timed out for " + file;
                 } catch (InterruptedException e) {
-                    System.out.println("❌ " + e.getMessage());
+                    return "❌ " + e.getMessage();
                 }
             });
+            Future<String> future = executor.submit(task);
+            results.add(future);
         }
 
         executor.shutdown();
         executor.awaitTermination(1, TimeUnit.MINUTES);
+
+        for(Future<String> res : results){
+            try {
+                System.out.println(res.get());
+            }
+            catch (ExecutionException e){
+                System.out.println("❌ Unexpected error: " + e.getCause());
+            }
+        }
 
         System.out.println("\n------------- Download Summary -------------");
         System.out.println("✅ Downloaded: " + success);
